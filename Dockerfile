@@ -7,7 +7,13 @@ WORKDIR /app
 COPY . /app
 
 RUN corepack enable
-RUN apk add --no-cache python3 alpine-sdk
+RUN apk add --no-cache python3 alpine-sdk git
+
+# Render's build context may omit .git, but @imput/version-info reads
+# Git metadata at runtime. Fetch the fork's metadata into the build stage.
+RUN git clone --depth 1 https://github.com/genzchamp/cobalt.git /tmp/cobalt-meta \
+    && cp -a /tmp/cobalt-meta/.git /app/.git \
+    && rm -rf /tmp/cobalt-meta
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
