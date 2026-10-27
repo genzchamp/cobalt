@@ -21,6 +21,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 RUN pnpm deploy --filter=@imput/cobalt-api --prod /prod/api
 
 FROM base AS api
+# Refresh the image's trusted CA bundle to address the Render eMudhra advisory.
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+
 WORKDIR /app
 
 COPY --from=build --chown=node:node /prod/api /app
